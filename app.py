@@ -56,7 +56,6 @@ if st.button("🔍 Predict Digit"):
 
     if canvas_result.image_data is not None:
 
-        # Convert canvas to PIL image
         img = Image.fromarray(
             canvas_result.image_data.astype("uint8")
         )
@@ -64,36 +63,30 @@ if st.button("🔍 Predict Digit"):
         # Convert to grayscale
         img = img.convert("L")
 
-        # Resize to MNIST size
+        # IMPORTANT: invert the image
+        img = Image.eval(img, lambda x: 255 - x)
+
+        # Resize to MNIST 28x28
         img = img.resize((28, 28))
 
-        # Convert to NumPy array
+        # Convert to NumPy
         img_array = np.array(img)
 
-        # Normalize pixel values
+        # Normalize
         img_array = img_array.astype("float32") / 255.0
 
         # Reshape for CNN
-        img_array = img_array.reshape(
-            1, 28, 28, 1
-        )
+        img_array = img_array.reshape(1, 28, 28, 1)
 
-        # Make prediction
+        # Predict
         prediction = model.predict(
             img_array,
             verbose=0
         )
 
-        # Get predicted digit
         predicted_digit = np.argmax(prediction)
-
-        # Get confidence
         confidence = np.max(prediction) * 100
 
-
-        # -----------------------------
-        # Display prediction
-        # -----------------------------
         st.success(
             f"Predicted Digit: {predicted_digit}"
         )
@@ -102,10 +95,6 @@ if st.button("🔍 Predict Digit"):
             f"Confidence: {confidence:.2f}%"
         )
 
-
-        # -----------------------------
-        # Probability
-        # -----------------------------
         st.subheader("Prediction Probability")
 
         probabilities = prediction[0]
